@@ -3,6 +3,7 @@ const admin = require("firebase-admin"); // for firestore
 const { validateBody, validateMethod } = require('./validate')
 const { getOrderItens } = require('./api')
 const { publishMessage } = require('./publish');
+const { listenForMessage } = require("./listener");
 
 exports.orderWebhook = functions.https.onRequest(async (req, res) => {
 
@@ -27,10 +28,12 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
             'body': data
         });
 
-        // TASK 2: APOS SALVAR PUBLICAR NO PUB SUB UMA MENSAGEM EM UMA FILA
+        // publica mensagem no pub sub (topico orders) (em uma fila?)
         publishMessage(req.body.id)
 
         // TASK 3: CRIAR UM FUNCTION QUE ESCUTA UMA FILA PUB SUB PARA ENVIAR EMAIL, USAR O AWS SNS
+        listenForMessage();
+
     }
 
     res.json({
