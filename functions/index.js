@@ -3,7 +3,6 @@ const admin = require("firebase-admin"); // for firestore
 const { validateBody, validateMethod } = require('./validate')
 const { getOrderItens } = require('./api')
 const { publishMessage } = require('./publish');
-const { listenForMessage } = require("./listener");
 
 exports.orderWebhook = functions.https.onRequest(async (req, res) => {
 
