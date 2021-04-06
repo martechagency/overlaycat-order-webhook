@@ -32,7 +32,6 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
         publishMessage(req.body.id)
 
         // TASK 3: CRIAR UM FUNCTION QUE ESCUTA UMA FILA PUB SUB PARA ENVIAR EMAIL, USAR O AWS SNS
-        listenForMessage();
 
     }
 
