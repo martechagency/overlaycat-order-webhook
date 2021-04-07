@@ -1,4 +1,4 @@
-const subscriptionName = 'projects/dev-overlaycat/subscriptions/orders-sub';
+const subscriptionName = 'projects/dev-overlaycat/subscriptions/paid-orders';
 const { PubSub } = require('@google-cloud/pubsub');
 
 const pubsub = new PubSub();
