@@ -3,10 +3,11 @@ require('dotenv').config();
 const { PubSub } = require('@google-cloud/pubsub');
 const pubsub = new PubSub();
 
-async function publishMessage(order_id) {
+async function publishMessage(orderData) {
     const date = new Date();
-    const data = `O pedido ${order_id} foi pago no dia ${date}`;
-    const dataBuffer = Buffer.from(data);
+    // const data = `O pedido ${order_id} foi pago no dia ${date}`;
+    const data = {"paymentDate": date, "orderInfo": orderData};
+    const dataBuffer = Buffer.from(JSON.stringify(data));
     const topicName = 'projects/dev-overlaycat/topics/orders';
 
     try {

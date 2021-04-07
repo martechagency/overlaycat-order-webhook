@@ -3,6 +3,7 @@ const admin = require("firebase-admin"); // for firestore
 const { validateBody, validateMethod } = require('./validate')
 const { getOrderItens } = require('./api')
 const { publishMessage } = require('./publish');
+const { listenForMessage } = require("./listener");
 
 exports.orderWebhook = functions.https.onRequest(async (req, res) => {
 
@@ -13,25 +14,24 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
     const response = await getOrderItens(req.body.id)
     const data = response.data;
 
-    // firestore config
+    // inicializa o firestore
     admin.initializeApp();
     const db = admin.firestore();
 
     for (let product of data.products) {
-        console.log(`Produto a ser enviado --> id: ${product.id}, nome: ${product.name}`)
+        console.log(`Produto a ser enviado --> id: ${product.id}, nome: ${product.name}`);
 
         // salva no firestone
         const orderRef = db.collection('orders').doc(`order${req.body.id}`);
-        await orderRef.set({
-            'receivedAt': new Date(),
-            'body': data
-        });
+        await orderRef.set({'receivedAt': new Date(), 'body': data});
 
-        // publica mensagem no pub sub (topico orders) (em uma fila?)
-        publishMessage(req.body.id)
+        // publica no PubSub
+        publishMessage(JSON.stringify(data));
 
-        // TASK 3: CRIAR UM FUNCTION QUE ESCUTA UMA FILA PUB SUB PARA ENVIAR EMAIL, USAR O AWS SNS
-
+        // escuta a fila e envia email pela aws sns
+        setTimeout(() => {
+            listenForMessage();
+        }, 60000);
     }
 
     res.json({
