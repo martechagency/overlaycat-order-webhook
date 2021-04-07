@@ -7,20 +7,16 @@ function listenForMessage() {
     const subscription = pubsub.subscription(subscriptionName);
 
     const messageHandler = message => {
-        // chama o sns para envio de emails
-        console.log(`Mensagem ${message.id} recebida.`);
-        console.log(`Os itens do pedido ${message.data.orderInfo.id} precisam ser enviados`);
+        // passar as informacoes do pedido para o email (aws sns)
+        console.log(`Mensagem recebida:`, message.data.toString());
+
         // informa o recebimento das mensagens
         message.ack();
     };
 
-    // listen for new messages
+    // recebe callbacks para novas mensagens na subscription
     subscription.on('message', messageHandler);
 
-    // setTimeout(() => {
-    //     subscription.removeListener('message', messageHandler);
-    //     console.log(`${messageCount} mensagem(s) recebida(s).`);
-    // }, timeout * 1000)
 }
 
 module.exports = {
