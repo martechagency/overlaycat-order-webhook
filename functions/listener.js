@@ -1,5 +1,7 @@
 const subscriptionName = 'projects/dev-overlaycat/subscriptions/paid-orders';
 const { PubSub } = require('@google-cloud/pubsub');
+const { sendMailMessage } = require('./sendMail');
+const { mailBuilder } = require('./build-email');
 
 const pubsub = new PubSub();
 
@@ -7,8 +9,13 @@ function listenForMessage() {
     const subscription = pubsub.subscription(subscriptionName);
 
     const messageHandler = message => {
-        // passar as informacoes do pedido para o email (aws sns)
         console.log(`Mensagem recebida:`, message.data.toString());
+
+        // constroi o corpo do email
+        const email = mailBuilder(message.data);
+
+        // envia email via AWS SES
+        // sendMailMessage(email);   COMENTEI PARA NAO DAR ERRO NA HORA DE TESTAR (ESTOU DESENVOLVENDO ESSA PARTE AINDA)
 
         // informa o recebimento das mensagens
         message.ack();
