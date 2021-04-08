@@ -12,7 +12,7 @@ function listenForMessage() {
         console.log(`Mensagem recebida:`, message.data.toString());
 
         // constroi o corpo do email
-        const email = mailBuilder(message.data);
+        // const email = mailBuilder(message.data);
 
         // envia email via AWS SES
         // sendMailMessage(email);   COMENTEI PARA NAO DAR ERRO NA HORA DE TESTAR (ESTOU DESENVOLVENDO ESSA PARTE AINDA)
