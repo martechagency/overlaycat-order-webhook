@@ -3,7 +3,8 @@ const admin = require("firebase-admin"); // for firestore
 const { validateBody, validateMethod } = require('./validate')
 const { getOrderItens } = require('./api')
 const { publishMessage } = require('./publish');
-const { listenForMessage } = require("./listener");
+const { sendMailMessage } = require('./sendMail');
+const { mailBuilder } = require('./build-email');
 
 exports.orderWebhook = functions.https.onRequest(async (req, res) => {
 
@@ -28,13 +29,23 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
         // publica no PubSub
         publishMessage(JSON.stringify(data));
 
-        // escuta a fila e envia email pela aws sns
-        setTimeout(() => {
-            listenForMessage();
-        }, 60000);
     }
 
     res.json({
         "error": false 
     }).status(200)
+});
+
+exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish((message) => {
+    const messageBody = message.data ? Buffer.from(message.data, 'base64').toString() : null;
+    // console.log(`body: ${messageBody}`);
+    const mensagem = JSON.parse(messageBody);
+    const orderInfo = JSON.parse(mensagem["orderInfo"]);
+
+    // constroi o corpo do email
+    const emailInfo = mailBuilder(orderInfo);
+
+    // envia email via AWS SES
+    sendMailMessage(emailInfo[0], emailInfo[1]);
+
 });
