@@ -6,7 +6,7 @@ function mailBuilder(data) {
     msg += '<p>';
     for (let i = 0; i < data['products'].length; i++) {
         const produto = data['products'][i]['name'];
-        msg += `<a>${produto}</a>`
+        msg += `<a>${produto}</a><br>`
     }
     msg += '</p>'
     return [toAddress, subject, msg];
