@@ -46,6 +46,6 @@ exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish((m
     const emailInfo = mailBuilder(orderInfo);
 
     // envia email via AWS SES
-    sendMailMessage(emailInfo[0], emailInfo[1]);
+    sendMailMessage(emailInfo[0], emailInfo[1], emailInfo[2]);
 
 });
