@@ -8,7 +8,7 @@ async function publishMessage(orderData) {
     // const data = `O pedido ${order_id} foi pago no dia ${date}`;
     const data = {"paymentDate": date, "orderInfo": orderData};
     const dataBuffer = Buffer.from(JSON.stringify(data));
-    const topicName = 'projects/dev-overlaycat/topics/orders';
+    const topicName = 'projects/dev-overlaycat/topics/paid-orders';
 
     try {
         const messageId = await pubsub.topic(topicName).publish(dataBuffer);
