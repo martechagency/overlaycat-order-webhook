@@ -21,15 +21,14 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
 
     for (let product of data.products) {
         console.log(`Produto a ser enviado --> id: ${product.id}, nome: ${product.name}`);
-
-        // salva no firestone
-        const orderRef = db.collection('orders').doc(`order${req.body.id}`);
-        await orderRef.set({'receivedAt': new Date(), 'body': data});
-
-        // publica no PubSub
-        publishMessage(JSON.stringify(data));
-
     }
+
+    // salva no firestone
+    const orderRef = db.collection('orders').doc(`order${req.body.id}`);
+    await orderRef.set({'receivedAt': new Date(), 'body': data});
+
+    // publica no PubSub
+    publishMessage(JSON.stringify(data));
 
     res.json({
         "error": false 
