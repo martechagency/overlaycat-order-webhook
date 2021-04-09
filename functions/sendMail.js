@@ -1,7 +1,7 @@
 require('dotenv').config();
 const SES = require('aws-sdk/clients/ses');
 
-async function sendMailMessage(email, ToAddress) {
+async function sendMailMessage(toAddress, email) {
     const client = new SES({region: 'us-east-2',});
     await client
         .sendEmail({
@@ -17,10 +17,7 @@ async function sendMailMessage(email, ToAddress) {
                     Html: {
                         Charset: 'UTF-8',
                         Data: email
-                    },
-                    Text: {
-                        Data: 'Email enviado com sucesso!',
-                    },
+                    }
                 },
             },
         })
