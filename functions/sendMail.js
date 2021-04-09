@@ -5,9 +5,9 @@ async function sendMailMessage(toAddress, subject, email) {
     const client = new SES({region: 'us-east-2',});
     await client
         .sendEmail({
-            Source: 'Guilherme Tadashii <infra@martechagency.com.br>',
+            Source: 'Overlaycat <infra@martechagency.com.br>',
             Destination: {
-                ToAddresses: ['Guilherme Tadashii <infra@martechagency.com.br>'],
+                ToAddresses: [toAddress],
             },
             Message: {
                 Subject: {
