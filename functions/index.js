@@ -6,6 +6,10 @@ const { publishMessage } = require('./publish');
 const { sendMailMessage } = require('./sendMail');
 const { mailBuilder } = require('./build-email');
 
+// inicializa o firestore
+admin.initializeApp();
+const db = admin.firestore();
+
 exports.orderWebhook = functions.https.onRequest(async (req, res) => {
 
     if (!validateMethod(req.method, res)) return
@@ -15,20 +19,16 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
     const response = await getOrderItens(req.body.id)
     const data = response.data;
 
-    // inicializa o firestore
-    admin.initializeApp();
-    const db = admin.firestore();
-
     for (let product of data.products) {
         console.log(`Produto a ser enviado --> id: ${product.id}, nome: ${product.name}`);
     }
 
     // salva no firestone
-    const orderRef = db.collection('orders').doc(`order${req.body.id}`);
-    await orderRef.set({'receivedAt': new Date(), 'body': data});
+    const orderRef = db.collection('orders').doc(`${req.body.id}`);
+    await orderRef.set({'receivedAt': new Date(), ...data});
 
     // publica no PubSub
-    publishMessage(JSON.stringify(data));
+    await publishMessage(data);
 
     res.json({
         "error": false 
@@ -37,9 +37,7 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
 
 exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish((message) => {
     const messageBody = message.data ? Buffer.from(message.data, 'base64').toString() : null;
-    // console.log(`body: ${messageBody}`);
-    const mensagem = JSON.parse(messageBody);
-    const orderInfo = JSON.parse(mensagem["orderInfo"]);
+    const orderInfo = JSON.parse(messageBody);
 
     // constroi o corpo do email
     const emailInfo = mailBuilder(orderInfo);
