@@ -36,7 +36,7 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
     }).status(200)
 });
 
-exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish((message) => {
+exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish(async (message) => {
     const messageBody = message.data ? Buffer.from(message.data, 'base64').toString() : null;
     const orderInfo = JSON.parse(messageBody);
     // baixa o arquivo com as images do pack
@@ -50,8 +50,8 @@ exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish((m
     const txt = 'mensagem-oculta'
 
     const response = await getDownloadLink(imgs, txt);
-    const link = response.data
-    console.log(link)
+    const link = response.data;
+    // console.log(link)
 
     // constroi o corpo do email
     const emailInfo = mailBuilder(orderInfo, link);
