@@ -2,7 +2,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin"); // for firestore
 const axios = require("axios");
 const { validateBody, validateMethod } = require('./validate')
-const { getOrderItens } = require('./api')
+const { getOrderItens, getDownloadLink } = require('./api')
 const { publishMessage } = require('./publish');
 const { sendMailMessage } = require('./sendMail');
 const { mailBuilder } = require('./build-email');
@@ -49,11 +49,8 @@ exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish((m
     ]
     const txt = 'mensagem-oculta'
 
-    const link = await axios.post('https://us-central1-dev-overlaycat.cloudfunctions.net/steganography', {
-        imgs: imgs,
-        message: txt
-    })
-
+    const response = await getDownloadLink(imgs, txt);
+    const link = response.data
     console.log(link)
 
     // constroi o corpo do email
