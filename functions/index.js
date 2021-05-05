@@ -21,10 +21,6 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
     const response = await getOrderItens(req.body.id)
     const data = response.data;
 
-    for (let product of data.products) {
-        console.log(`Produto a ser enviado --> id: ${product.id}, nome: ${product.name}`);
-    }
-
     // salva no firestone
     const orderRef = db.collection('orders').doc(`${req.body.id}`);
     await orderRef.set({ 'receivedAt': new Date(), ...data });
@@ -64,13 +60,9 @@ exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish(as
         // const files = await storage.bucket('dev-overlaycat-packs').getFiles(prefix = `${id}/`);
         const files = await storage.bucket('dev-overlaycat-packs').getFiles(options);
 
-        console.log(id);
-        console.log(typeof (files[0]));
-        console.log(files[0]);
-
         for (let i = 1; i < files[0].length; i++) {
             const downloadURL = files[0][i].publicUrl();
-            console.log(downloadURL);
+            // console.log(downloadURL);
             imgs.push(downloadURL);
         }
 
