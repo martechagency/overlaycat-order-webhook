@@ -1,11 +1,12 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin"); // for firestore
-const axios = require("axios");
+const { Storage } = require("@google-cloud/storage");
 const { validateBody, validateMethod } = require('./validate')
 const { getOrderItens, getDownloadLink } = require('./api')
 const { publishMessage } = require('./publish');
 const { sendMailMessage } = require('./sendMail');
 const { mailBuilder } = require('./build-email');
+require('dotenv').config();
 
 // inicializa o firestore
 admin.initializeApp();
@@ -39,19 +40,55 @@ exports.orderWebhook = functions.https.onRequest(async (req, res) => {
 exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish(async (message) => {
     const messageBody = message.data ? Buffer.from(message.data, 'base64').toString() : null;
     const orderInfo = JSON.parse(messageBody);
-    // baixa o arquivo com as images do pack
-    const imgs = [
-        'https://d2r9epyceweg5n.cloudfront.net/stores/001/605/982/products/copia-de-copia-de-stream-11-6300d55101cc6f8b1516159914975265-1024-1024.png',
-        'https://d2r9epyceweg5n.cloudfront.net/stores/001/605/982/products/211-7f0b325e7d1791c08516159929528911-1024-1024.png',
-        'https://d2r9epyceweg5n.cloudfront.net/stores/001/605/982/products/111-04fdad1f872b272ec116159929535565-1024-1024.png',
-        'https://d2r9epyceweg5n.cloudfront.net/stores/001/605/982/products/411-83acfb7b2b030e146016159929533612-1024-1024.png',
-        'https://d2r9epyceweg5n.cloudfront.net/stores/001/605/982/products/311-3e6884934061211fc016159929534701-1024-1024.png'
-    ]
-    const txt = 'mensagem-oculta'
+
+    // cria client para o storage
+    const storage = new Storage({ keyFile: "./credentials/dev-overlaycat-credentials.json" });
+
+    // pegar o id do produto e pegar as imagens dos packs
+    const products = orderInfo['orderInfo']['products'];
+    let products_id = [];
+
+    for (let i = 0; i < products.length; i++) {
+        const element = products[i]['product_id'];
+        products_id.push(element);
+    }
+
+    let imgs = [];
+
+    for (let i = 0; i < products_id.length; i++) {
+        const id = products_id[i];
+        const options = {
+            prefix: `${id}/`,
+            delimiter: '/'
+        };
+        // const files = await storage.bucket('dev-overlaycat-packs').getFiles(prefix = `${id}/`);
+        const files = await storage.bucket('dev-overlaycat-packs').getFiles(options);
+
+        console.log(id);
+        console.log(typeof (files[0]));
+        console.log(files[0]);
+
+        for (let i = 1; i < files[0].length; i++) {
+            const downloadURL = files[0][i].publicUrl();
+            console.log(downloadURL);
+            imgs.push(downloadURL);
+        }
+
+    }
+
+    // const files = await storage.bucket('dev-overlaycat-packs')
+    //     .getFiles(prefix = 'sad-cat/');
+
+    // for (let i = 1; i < files[0].length; i++) {
+    //     const downloadURL = files[0][i].publicUrl();
+    //     console.log(downloadURL);
+    //     imgs.push(downloadURL);
+    // }
+
+    const txt = 'mensagem-oculta';
 
     const response = await getDownloadLink(imgs, txt);
     const link = response.data;
-    // console.log(link)
 
     // constroi o corpo do email
     const emailInfo = mailBuilder(orderInfo, link);
