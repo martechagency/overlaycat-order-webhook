@@ -4,11 +4,7 @@ function mailBuilder(data, link) {
     let msg = '';
     msg += `<h1>Recebemos o pagamento de seu pedido.</h1><p>Baixe os arquivos de seu pedido pelo link: </p>`;
     msg += '<p>';
-    // for (let i = 0; i < data['orderInfo']['products'].length; i++) {
-    //     const produto = data['orderInfo']['products'][i]['name'];
-    //     msg += `<a>${produto}</a><br>`
-    // }
-    msg += link
+    msg += `<a href="${link}" target="_blank">Arquivos de seu pack</a>`
     msg += '</p>'
     return [toAddress, subject, msg];
 }
