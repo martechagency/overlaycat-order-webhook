@@ -76,15 +76,6 @@ exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish(as
 
     }
 
-    // const files = await storage.bucket('dev-overlaycat-packs')
-    //     .getFiles(prefix = 'sad-cat/');
-
-    // for (let i = 1; i < files[0].length; i++) {
-    //     const downloadURL = files[0][i].publicUrl();
-    //     console.log(downloadURL);
-    //     imgs.push(downloadURL);
-    // }
-
     const txt = 'mensagem-oculta';
 
     const response = await getDownloadLink(imgs, txt);
