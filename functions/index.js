@@ -2,7 +2,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin"); // for firestore
 const { Storage } = require("@google-cloud/storage");
 const { validateBody, validateMethod } = require('./validate')
-const { getOrderItens, getDownloadLink } = require('./api')
+const { getOrderItens, getPackName, getDownloadLink } = require('./api')
 const { publishMessage } = require('./publish');
 const { sendMailMessage } = require('./sendMail');
 const { mailBuilder } = require('./build-email');
@@ -45,11 +45,11 @@ exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish(as
     let products_id = [];
 
     for (let i = 0; i < products.length; i++) {
-        const element = products[i]['product_id'];
-        products_id.push(element);
+        const product_id = products[i]['product_id'];
+        products_id.push(product_id);
     }
 
-    let imgs = [];
+    let info = [];
 
     for (let i = 0; i < products_id.length; i++) {
         const id = products_id[i];
@@ -57,20 +57,31 @@ exports.listenForPaidOrders = functions.pubsub.topic('paid-orders').onPublish(as
             prefix: `${id}/`,
             delimiter: '/'
         };
-        // const files = await storage.bucket('dev-overlaycat-packs').getFiles(prefix = `${id}/`);
         const files = await storage.bucket('dev-overlaycat-packs').getFiles(options);
 
         for (let i = 1; i < files[0].length; i++) {
+            const storagePath = files[0][i].name;
+            const pathArray = storagePath.split('/');
+            const imgName = pathArray[1].slice(0, -4);
+            const response = await getPackName(parseInt(pathArray[0]));
+            const packName = response.data.handle.pt;
+
             const downloadURL = files[0][i].publicUrl();
-            // console.log(downloadURL);
-            imgs.push(downloadURL);
+
+            const infoImg = {
+                pack: packName,
+                name: imgName,
+                url: downloadURL
+            }
+
+            info.push(infoImg);
         }
 
     }
 
     const txt = 'mensagem-oculta';
 
-    const response = await getDownloadLink(imgs, txt);
+    const response = await getDownloadLink(info, txt);
     const link = response.data;
 
     // constroi o corpo do email
