@@ -9,10 +9,13 @@ const config = {
 }
 
 const getOrderItens = (id) => axios.get(`https://api.nuvemshop.com.br/v1/1605982/orders/${id}`, config);
-const getDownloadLink = async (imgs, message) => await axios.post(
+
+const getPackName = (id) => axios.get(`https://api.nuvemshop.com.br/v1/1605982/products/${id}`, config);
+
+const getDownloadLink = async (info, message) => await axios.post(
     'https://us-central1-dev-overlaycat.cloudfunctions.net/steganography',
     {
-        imgs: imgs,
+        info: info,
         message: message
     }
 ).then(response => {
@@ -21,5 +24,6 @@ const getDownloadLink = async (imgs, message) => await axios.post(
 
 module.exports = {
     getOrderItens,
+    getPackName,
     getDownloadLink
 }
